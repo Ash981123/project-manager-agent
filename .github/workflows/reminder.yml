@@ -1,0 +1,39 @@
+name: 项目管理提醒
+
+on:
+  schedule:
+    # 每周一早上9点 (UTC时间1点 = 北京时间9点)
+    - cron: '0 1 * * 1'
+    # 每周四早上9点
+    - cron: '0 1 * * 4'
+
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 安装依赖
+      run: |
+        pip install lark-oapi requests python-dateutil pytz
+
+    - name: 发送提醒
+      env:
+        FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+        FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+        FEISHU_APP_TOKEN: ${{ secrets.FEISHU_APP_TOKEN }}
+        FEISHU_TABLE_ID: ${{ secrets.FEISHU_TABLE_ID }}
+        FEISHU_CHAT_ID: ${{ secrets.FEISHU_CHAT_ID }}
+      run: |
+        python github_action_script.py
+
